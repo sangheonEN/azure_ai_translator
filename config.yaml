@@ -1,0 +1,4 @@
+azure_config:
+  key: your_azure_key_here
+  endpoint: your_azure_endpoint_here
+  location: your_azure_location_here

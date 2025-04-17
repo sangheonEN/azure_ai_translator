@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>실시간 번역 채팅</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      background: #f0f0f0; 
+      padding: 20px; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+    }
+    #chatContainer {
+      width: 400px;
+      height: 500px;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 10px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    .message-container { 
+      margin-bottom: 10px; 
+    }
+    .user-text {
+      background-color: #dcf8c6;
+      padding: 8px;
+      border-radius: 5px;
+      margin-bottom: 2px;
+      word-break: break-word;
+    }
+    .translation-text {
+      background-color: #eee;
+      padding: 8px;
+      border-radius: 5px;
+      font-style: italic;
+      word-break: break-word;
+    }
+    #inputContainer {
+      display: flex;
+      align-items: center;
+      width: 400px;
+      gap: 5px;
+    }
+    #langSelect {
+      padding: 8px;
+      font-size: 16px;
+    }
+    #textInput {
+      flex: 1;
+      padding: 8px;
+      font-size: 16px;
+    }
+    #sendBtn {
+      padding: 8px 16px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h2>실시간 번역 채팅</h2>
+  <div id="chatContainer"></div>
+
+  <div id="inputContainer">
+    <!-- 번역 대상 언어 선택 -->
+    <select id="langSelect">
+      <option value="ko">한국어 (ko)</option>
+      <option value="en">영어 (en)</option>
+      <option value="ja">일본어 (ja)</option>
+      <option value="fr">프랑스어 (fr)</option>
+      <option value="de">독일어 (de)</option>
+      <option value="zh-Hans">중국어(간체) (zh-Hans)</option>
+    </select>
+    <!-- 번역할 텍스트 입력 -->
+    <input type="text" id="textInput" placeholder="번역할 문장을 입력하세요">
+    <button id="sendBtn">전송</button>
+  </div>
+
+  <script>
+    // WebSocket 연결 (실제 서버 주소로 바꿔주세요)
+    const socket = new WebSocket("ws://127.0.0.1:8000/ws/translate");
+    
+    socket.onopen = () => {
+      console.log("WebSocket 연결됨");
+    };
+
+    let lastMessageContainer = null;
+
+    socket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        // 첫 번째 번역 결과만 추출
+        const translatedText = (data.translations && data.translations.length > 0 && data.translations[0].text)
+                                 ? data.translations[0].text
+                                 : "(번역 결과 없음)";
+        // 이전에 추가해 둔 컨테이너에 번역을 채워 넣음
+        if (lastMessageContainer) {
+          lastMessageContainer.querySelector('.translation-text').textContent = translatedText;
+          lastMessageContainer = null;
+        }
+      } catch (err) {
+        console.error("파싱 오류:", err);
+      }
+    };
+
+    socket.onerror = (err) => {
+      console.error("WebSocket 오류:", err);
+    };
+
+    // 채팅창에 메시지 추가
+    function addMessage(text) {
+      const chat = document.getElementById("chatContainer");
+      const container = document.createElement("div");
+      container.classList.add("message-container");
+      
+      // 사용자 입력 영역
+      const userDiv = document.createElement("div");
+      userDiv.classList.add("user-text");
+      userDiv.textContent = text;
+      container.appendChild(userDiv);
+
+      // 번역 결과 담을 빈 영역
+      const transDiv = document.createElement("div");
+      transDiv.classList.add("translation-text");
+      transDiv.textContent = "";  // 서버 응답 후 채워질 예정
+      container.appendChild(transDiv);
+
+      chat.appendChild(container);
+      chat.scrollTop = chat.scrollHeight;
+
+      // 서버 응답 시 이 컨테이너를 업데이트하도록 참조 저장
+      lastMessageContainer = container;
+    }
+
+    // 전송 처리
+    function sendText() {
+      const textInput = document.getElementById("textInput");
+      const langSelect = document.getElementById("langSelect");
+      const text = textInput.value.trim();
+      const toLang = langSelect.value;  // 배열로 보내려면 [ langSelect.value ] 로 감싸세요
+
+      if (!text) {
+        alert("번역할 문장을 입력하세요.");
+        return;
+      }
+
+      addMessage(text);
+      // 서버로 번역 요청 전송
+      socket.send(JSON.stringify({ text: text, to: [toLang] }));
+
+      textInput.value = "";
+      textInput.focus();
+    }
+
+    document.getElementById("sendBtn").addEventListener("click", sendText);
+    document.getElementById("textInput").addEventListener("keydown", e => {
+      if (e.key === "Enter") sendText();
+    });
+  </script>
+</body>
+</html>
