@@ -9,7 +9,7 @@
 
 1. PYTHON 가상환경 설치
 
-2. Config Azure key, region, endpoint 설정
+2. Config Azure key, region, endpoint 설정 (config.yaml 수정)
 - azure_config:
   key: your_azure_key_here
   endpoint: your_azure_endpoint_here
