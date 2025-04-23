@@ -4,3 +4,10 @@
 2. 웹 서버 프레임워크 : FAST API
 3. 테스트 클라이언트 : HTML
 4. 웹 통신 : WebSocket
+
+# 실행 방법
+
+1. PYTHON 가상환경 설치
+2. LOCAL 서버에서 uvicorn 명령어 실행
+
+uvicorn websocket_fastapi_translator:app --reload
