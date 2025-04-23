@@ -8,7 +8,14 @@
 # 실행 방법
 
 1. PYTHON 가상환경 설치
-2. LOCAL 서버에서 uvicorn 명령어 실행
+
+2. Config Azure key, region, endpoint 설정
+- azure_config:
+  key: your_azure_key_here
+  endpoint: your_azure_endpoint_here
+  location: your_azure_location_here
+
+3. LOCAL 서버에서 uvicorn 명령어 실행
 
 uvicorn websocket_fastapi_translator:app --reload
 
