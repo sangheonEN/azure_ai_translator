@@ -11,3 +11,8 @@
 2. LOCAL 서버에서 uvicorn 명령어 실행
 
 uvicorn websocket_fastapi_translator:app --reload
+
+
+# HTML UI
+
+![image](https://github.com/user-attachments/assets/7777a1da-22c1-4fd9-a539-a2e86142e1b7)
